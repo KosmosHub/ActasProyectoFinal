@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Acta de Entrega</title>
+    <!-- Enlace al CSS separado -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <!-- Logo institucional en esquina superior izquierda -->
+        <img src="logo.png" alt="Logo Municipalidad">
+        <div class="header-text">
+            <p><strong>ILUSTRE MUNICIPALIDAD DE OVALLE</strong></p>
+            <p><strong>DEPARTAMENTO DE EDUCACIÓN MUNICIPAL</strong></p>
+        </div>
+    </div>
+
+    <h1>ACTA DE ENTREGA DE PRODUCTOS Y/O SERVICIOS</h1>
+
+    <p>
+        El día <strong>{{ fecha }}</strong> se hace entrega de los bienes y servicios a don/doña 
+        <strong>{{ receptor }}</strong>, cargo <strong>{{ cargo }}</strong>, y en representación del 
+        Establecimiento o Sección <strong>{{ establecimiento }}</strong>, correspondiente a la fuente de financiamiento: 
+        <strong>{{ financiamiento }}</strong>.
+    </p>
+
+    <p>
+        Orden de compra: <strong>{{ orden_compra }}</strong> &nbsp;&nbsp;
+        Factura: <strong>{{ factura }}</strong> &nbsp;&nbsp;
+        Guía: <strong>{{ guia }}</strong> <br>
+        Proveedor: <strong>{{ proveedor }}</strong> &nbsp;&nbsp;
+        RUT: <strong>{{ rut }}</strong>
+    </p>
+
+    <div class="firma">
+        _________________________ <br>
+        Timbre, Firma y Nombre de quién entrega
+    </div>
+
+    <div class="firma">
+        _________________________ <br>
+        Timbre, Firma y Nombre de quién recibe
+    </div>
+
+    <div class="distribucion">
+        <p><strong>Distribución:</strong></p>
+        <p>Bodega DEM</p>
+        <p>Escuela</p>
+    </div>
+</body>
+</html>
