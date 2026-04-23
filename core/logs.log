@@ -1,0 +1,4 @@
+2026-04-20 15:31:07,976 - ERROR - Error al leer Excel: [Errno 2] No such file or directory: 'data/entrada.xlsx'
+2026-04-20 15:31:07,977 - ERROR - Error en el proceso principal: [Errno 2] No such file or directory: 'data/entrada.xlsx'
+2026-04-20 15:31:29,283 - ERROR - Error al leer Excel: [Errno 2] No such file or directory: 'data/entrada.xlsx'
+2026-04-20 15:31:29,283 - ERROR - Error en el proceso principal: [Errno 2] No such file or directory: 'data/entrada.xlsx'
