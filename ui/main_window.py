@@ -1,4 +1,3 @@
-# ui/main_window.py
 from PyQt5.QtWidgets import QMainWindow
 from ui.upload_view import UploadView
 
@@ -7,4 +6,4 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Sistema de Actas — DEM Ovalle")
         self.resize(800, 600)
-        self.setCentralWidget(UploadView())
+        self.setCentralWidget(UploadView(self))

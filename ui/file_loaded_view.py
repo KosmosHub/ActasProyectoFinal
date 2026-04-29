@@ -1,60 +1,36 @@
-# ui/file_loaded_view.py
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QPushButton
+from PyQt5.QtCore import Qt
 
 class FileLoadedView(QWidget):
     def __init__(self, file_info, parent=None):
         super().__init__(parent)
+        self.parent_window = parent
+        self.file_info = file_info
         layout = QVBoxLayout()
 
-        self.label_file = QLabel(f"Archivo cargado: {file_info['nombre']} (válido)")
-        self.label_financiamiento = QLabel(f"Financiamiento: {file_info['financiamiento']}")
-        self.label_summary = QLabel(
-            f"Establecimientos: {file_info['establecimientos']} | "
-            f"Productos: {file_info['productos']} | "
-            f"Actas a generar: {file_info['actas']}"
-        )
+        layout.addWidget(QLabel(f"<b>Vista Previa Carga OC: {file_info.get('orden_compra')}</b>"))
 
-        self.table = QTableWidget(len(file_info['preview']), 3)
-        self.table.setHorizontalHeaderLabels(["Establecimiento", "Productos", "Total"])
-        for row, item in enumerate(file_info['preview']):
-            self.table.setItem(row, 0, QTableWidgetItem(item['nombre']))
-            self.table.setItem(row, 1, QTableWidgetItem(str(item['productos'])))
-            self.table.setItem(row, 2, QTableWidgetItem(str(item['total'])))
+        self.table = QTableWidget()
+        datos = file_info.get("preview", [])
+        self.table.setColumnCount(3)
+        self.table.setRowCount(len(datos))
+        self.table.setHorizontalHeaderLabels(["Establecimiento / RBD", "Items", "Total ($)"])
 
-        self.btn_change = QPushButton("Cambiar archivo")
-        self.btn_process = QPushButton("Procesar actas")
+        for i, fila in enumerate(datos):
+            self.table.setItem(i, 0, QTableWidgetItem(fila.get("nombre", "N/A")))
+            self.table.setItem(i, 1, QTableWidgetItem(str(fila.get("productos", 0))))
+            self.table.setItem(i, 2, QTableWidgetItem(f"$ {fila.get('total', 0):,.0f}"))
 
-        layout.addWidget(self.label_file)
-        layout.addWidget(self.label_summary)
-        layout.addWidget(self.label_financiamiento)  # ahora sí funciona
         layout.addWidget(self.table)
-        layout.addWidget(self.btn_change)
-        layout.addWidget(self.btn_process)
-
+        self.btn_confirm = QPushButton("✅ Generar Actas y Guardar")
+        self.btn_confirm.setFixedHeight(40)
+        self.btn_confirm.setStyleSheet("background-color: #27ae60; color: white; font-weight: bold;")
+        self.btn_confirm.clicked.connect(self.finalizar)
+        layout.addWidget(self.btn_confirm)
         self.setLayout(layout)
 
-
-# 🔹 Bloque de prueba independiente
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-
-    # Datos de prueba completos (incluye financiamiento)
-    file_info = {
-        "nombre": "OrdenCompra_2024_05.xlsx",
-        "establecimientos": 12,
-        "productos": 48,
-        "actas": 12,
-        "financiamiento": "Subvención Escolar Preferencial (SEP)",  # agregado
-        "preview": [
-            {"nombre": "Colegio San Martín", "productos": 6, "total": 124500},
-            {"nombre": "Escuela Diego de Almagro", "productos": 4, "total": 88200},
-        ]
-    }
-
-    window = FileLoadedView(file_info)
-    window.show()
-
-    sys.exit(app.exec_())
+    def finalizar(self):
+        import main
+        if main.procesar_final(self.file_info['nombre_excel'], self.file_info):
+            self.btn_confirm.setText("¡PROCESO COMPLETADO!")
+            self.btn_confirm.setEnabled(False)

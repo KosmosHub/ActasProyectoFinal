@@ -1,6 +1,7 @@
-# ui/upload_view.py
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QComboBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QComboBox, QLineEdit, QCompleter
+from PyQt5.QtCore import Qt
 from ui.file_loaded_view import FileLoadedView
+from core.database import obtener_proveedores_dict
 import main
 
 class UploadView(QWidget):
@@ -9,73 +10,65 @@ class UploadView(QWidget):
         self.parent_window = parent
         layout = QVBoxLayout()
 
-        self.label = QLabel("Arrastra o selecciona el archivo Excel oficial del DEM")
-        self.status = QLabel("Sin archivo seleccionado")
+        layout.addWidget(QLabel("<b>Sistema de Actas — Ovalle 2026</b>"))
+        self.status = QLabel("Seleccione el archivo Excel")
 
-        # 🔹 ComboBox para financiamiento
-        self.combo_financiamiento = QComboBox()
-        self.combo_financiamiento.addItems([
-            "Subvención Escolar Preferencial (SEP)",
-            "Fondos Propios",
-            "Programa de Mejoramiento",
-            "Convenio Marco",
-            "Otros"
-        ])
+        self.input_oc = QLineEdit()
+        self.input_oc.setPlaceholderText("Número de Orden de Compra")
+        layout.addWidget(self.input_oc)
 
-        self.btn_select = QPushButton("Seleccionar archivo")
-        self.btn_cancel = QPushButton("Cancelar")
-        self.btn_process = QPushButton("Procesar actas")
+        self.input_prov = QLineEdit()
+        self.input_prov.setPlaceholderText("Nombre del Proveedor")
+        layout.addWidget(self.input_prov)
 
+        self.input_rut = QLineEdit()
+        self.input_rut.setPlaceholderText("RUT del Proveedor")
+        layout.addWidget(self.input_rut)
+
+        self.memoria = obtener_proveedores_dict()
+        completer = QCompleter(self.memoria.keys())
+        self.input_prov.setCompleter(completer)
+        completer.activated.connect(lambda n: self.input_rut.setText(self.memoria.get(n, "")))
+
+        self.combo_finan = QComboBox()
+        self.combo_finan.addItems(["SEP", "FONDOS PROPIOS", "PIE", "MANTENCIÓN"])
+        layout.addWidget(QLabel("Financiamiento:"))
+        layout.addWidget(self.combo_finan)
+
+        self.btn_select = QPushButton("📁 Cargar Excel")
+        self.btn_process = QPushButton("Siguiente ➡")
         self.btn_select.clicked.connect(self.select_file)
         self.btn_process.clicked.connect(self.process_file)
 
-        layout.addWidget(self.label)
-        layout.addWidget(self.status)
-        layout.addWidget(QLabel("Seleccione financiamiento:"))
-        layout.addWidget(self.combo_financiamiento)
         layout.addWidget(self.btn_select)
-        layout.addWidget(self.btn_cancel)
+        layout.addWidget(self.status)
         layout.addWidget(self.btn_process)
-
         self.setLayout(layout)
         self.file_path = None
 
     def select_file(self):
-        ruta, _ = QFileDialog.getOpenFileName(
-            self,
-            "Seleccionar Excel oficial del DEM",
-            "",
-            "Archivos Excel (*.xlsx *.xls)"
-        )
+        ruta, _ = QFileDialog.getOpenFileName(self, "Excel", "", "Excel (*.xlsx *.xls)")
         if ruta:
             self.file_path = ruta
-            self.status.setText(f"Archivo seleccionado: {ruta}")
+            self.status.setText(f"Cargado: {ruta.split('/')[-1]}")
 
     def process_file(self):
-        if not self.file_path:
-            self.status.setText("Primero selecciona un archivo.")
+        if not self.file_path or not self.input_oc.text():
+            self.status.setText("❌ Falta cargar archivo o ingresar OC.")
             return
+        
         try:
-            resultados = main.procesar_excel(self.file_path)
+            prev_data = main.analizar_excel_previa(self.file_path)
+            if not prev_data:
+                self.status.setText("❌ No se detectaron colegios válidos.")
+                return
 
-            # 🔹 Capturar financiamiento seleccionado
-            financiamiento = self.combo_financiamiento.currentText()
-
-            # Simulación de datos que devuelve procesar_excel
             file_info = {
-                "nombre": self.file_path,
-                "establecimientos": 12,
-                "productos": 48,
-                "actas": 12,
-                "financiamiento": financiamiento,
-                "preview": [
-                    {"nombre": "Colegio San Martín", "productos": 6, "total": 124500},
-                    {"nombre": "Escuela Diego de Almagro", "productos": 4, "total": 88200},
-                ]
+                "nombre_excel": self.file_path, "orden_compra": self.input_oc.text(),
+                "proveedor_nombre": self.input_prov.text(), "proveedor_rut": self.input_rut.text(),
+                "financiamiento": self.combo_finan.currentText(), "preview": prev_data
             }
-
-            # Cambiar vista en MainWindow → Pantalla 2
-            self.parent_window.setCentralWidget(FileLoadedView(file_info, self.parent_window))
-
+            main_win = self.parent_window or self.window()
+            main_win.setCentralWidget(FileLoadedView(file_info, main_win))
         except Exception as e:
-            self.status.setText(f"Error: {str(e)}")
+            self.status.setText(f"Error: {e}")

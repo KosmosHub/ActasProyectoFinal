@@ -1,34 +1,28 @@
-from jinja2 import Environment, FileSystemLoader
-import pdfkit
 import os
+import re
+import pdfkit
+from jinja2 import Environment, FileSystemLoader
+from config.settings import TEMPLATES_DIR, OUTPUT_DIR, WKHTMLTOPDF_PATH
 
-TEMPLATES_DIR = "output/templates"
-OUTPUT_DIR = "output"
+def limpiar_texto(t):
+    return re.sub(r'[<>:"/\\|?*\n\r]', '', str(t)).strip()
 
 def generar_acta(datos, productos):
-    env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
-    template = env.get_template("acta_template.html")
+    try:
+        config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
+        oc_folder = f"OC_{limpiar_texto(datos['orden_compra'])}"
+        ruta_carpeta = os.path.join(OUTPUT_DIR, oc_folder)
+        os.makedirs(ruta_carpeta, exist_ok=True)
 
-    html_renderizado = template.render(
-        fecha=datos["fecha"],
-        receptor=datos["receptor"],
-        cargo=datos["cargo"],
-        establecimiento=datos["nrc"],
-        financiamiento=datos["financiamiento"],
-        orden_compra=datos["orden_compra"],
-        factura=datos["factura"],
-        guia=datos["guia"],
-        proveedor=datos["proveedor"],
-        rut=datos["rut"],
-        productos=productos,
-        total=datos["total"]
-    )
+        nombre_pdf = f"Acta_{limpiar_texto(datos['rbd'])}.pdf"
+        ruta_pdf = os.path.join(ruta_carpeta, nombre_pdf)
 
-    ruta_html = os.path.join(OUTPUT_DIR, f"acta_{datos['nrc']}.html")
-    ruta_pdf = os.path.join(OUTPUT_DIR, f"acta_{datos['nrc']}.pdf")
+        env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
+        template = env.get_template("acta_template.html")
+        html_content = template.render(d=datos, productos=productos)
 
-    with open(ruta_html, "w", encoding="utf-8") as f:
-        f.write(html_renderizado)
-
-    pdfkit.from_file(ruta_html, ruta_pdf)
-    return ruta_pdf
+        pdfkit.from_string(html_content, ruta_pdf, configuration=config)
+        return os.path.join(oc_folder, nombre_pdf)
+    except Exception as e:
+        print(f"Error al generar PDF: {e}")
+        return None
