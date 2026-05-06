@@ -2,11 +2,11 @@ import pandas as pd
 import re
 
 def normalizar(texto):
+    """Limpia el texto para facilitar la comparación."""
     if not texto: return ""
     t = str(texto).upper()
-    # Eliminamos caracteres especiales que ensucian la comparación
-    t = re.sub(r'[.\-,\(\)°#]', ' ', t)
-    return " ".join(t.split())
+    t = re.sub(r'[.\-,\(\)°#]', ' ', t) # Quita puntos, guiones y paréntesis
+    return " ".join(t.split()) # Quita espacios extra
 
 def cargar_excel(ruta):
     try:
@@ -25,29 +25,33 @@ def agrupar_por_filas(df, maestra_colegios):
     colegio_actual_rbd = None
     colegio_actual_nombre = None
     
-    # Normalizamos los datos de la BD para comparar
-    maestra_preparada = []
+    # Preparamos los nombres de la BD para comparaciones Regex (flexibles)
+    maestra_prep = []
     for c in maestra_colegios:
-        maestra_preparada.append({
-            "rbd": normalizar(c['rbd']),
-            "nombre": normalizar(c['nombre']),
-            "alias": normalizar(c['alias']),
+        # Escapamos los nombres para usarlos en Regex (por si tienen caracteres especiales)
+        maestra_prep.append({
+            "regex_rbd": re.compile(re.escape(normalizar(c['rbd'])), re.IGNORECASE),
+            "regex_nombre": re.compile(re.escape(normalizar(c['nombre'])), re.IGNORECASE),
+            "regex_alias": re.compile(re.escape(normalizar(c['alias'])), re.IGNORECASE),
             "original": c['nombre'],
             "rbd_original": c['rbd']
         })
 
-    for _, fila in df.iterrows():
-        # Convertimos la fila a un solo bloque de texto limpio
+    print("🔎 Iniciando escaneo de Excel...")
+
+    for i, fila in df.iterrows():
+        # Unimos toda la fila en un solo bloque de texto limpio
         bloque_fila = normalizar(" ".join([str(v) for v in fila if pd.notna(v)]))
+        
         if not bloque_fila: continue
 
-        # 1. BUSCADOR TRIPLE (RBD, NOMBRE o ALIAS)
-        encontrado = False
-        for c in maestra_preparada:
-            # ¿Aparece el RBD, el Nombre o el Alias en esta fila?
-            if (c['rbd'] in bloque_fila or 
-                c['nombre'] in bloque_fila or 
-                c['alias'] in bloque_fila):
+        # 1. BUSCADOR TRIPLE FLEXIBLE (RBD, NOMBRE o ALIAS)
+        encontrado_en_fila = False
+        for c in maestra_prep:
+            # Buscamos coincidencias Regex en la fila completa
+            if (c['regex_rbd'].search(bloque_fila) or 
+                c['regex_nombre'].search(bloque_fila) or 
+                c['regex_alias'].search(bloque_fila)):
                 
                 colegio_actual_rbd = c['rbd_original']
                 colegio_actual_nombre = c['original']
@@ -57,11 +61,11 @@ def agrupar_por_filas(df, maestra_colegios):
                         "nombre": colegio_actual_nombre,
                         "productos": []
                     }
-                encontrado = True
-                print(f"✅ Coincidencia hallada: {colegio_actual_nombre} (RBD: {colegio_actual_rbd})")
+                encontrado_en_fila = True
+                print(f"✅ MATCH hallado en fila {i+1}: {colegio_actual_nombre} ({colegio_actual_rbd})")
                 break
         
-        if encontrado: continue
+        if encontrado_en_fila: continue
 
         # 2. CAPTURA DE PRODUCTOS
         datos_limpios = [str(v).strip() for v in fila if pd.notna(v)]
@@ -69,14 +73,27 @@ def agrupar_por_filas(df, maestra_colegios):
             try:
                 # El total suele ser el último número de la fila
                 ultimo = datos_limpios[-1].replace('$', '').replace('.', '').replace(',', '').strip()
-                if ultimo.isdigit() and float(ultimo) > 0:
+                
+                # 🔹 FILTRO ANTIBASURA:
+                # Verificamos que sea número, que el producto no sea numérico (evita subtotales)
+                # y que la descripción sea larga.
+                descripcion_producto = datos_limpios[1] if len(datos_limpios) > 1 else datos_limpios[0]
+                
+                es_monto_valido = ultimo.replace('.','').isdigit() and float(ultimo.replace('.','')) > 0
+                es_desc_valida = not descripcion_producto.replace('.','').isdigit() and len(descripcion_producto) > 5
+
+                if es_monto_valido and es_desc_valida:
+                    # Ajustamos captura (Cant, Desc, Total)
                     grupos[colegio_actual_rbd]["productos"].append({
-                        "producto": datos_limpios[1] if len(datos_limpios) > 1 else datos_limpios[0],
-                        "cantidad": datos_limpios[2] if len(datos_limpios) > 2 else "1",
-                        "precio_unit": 0,
-                        "total": float(ultimo)
+                        "producto": descripcion_producto,
+                        "cantidad": datos_limpios[2] if len(datos_limpios) > 2 else "1 Unid.",
+                        "precio_unit": 0, # Calculado opcionalmente
+                        "total": float(ultimo.replace('.',''))
                     })
-            except:
+            except Exception as e:
                 continue
 
-    return grupos
+    # Devolvemos solo colegios con productos reales detectados
+    resultado = {k: v for k, v in grupos.items() if len(v) > 0}
+    print(f"📊 Resumen Escaneo: Se detectaron {len(resultado)} establecimientos con productos.")
+    return resultado

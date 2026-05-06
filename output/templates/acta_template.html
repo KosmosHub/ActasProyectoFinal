@@ -1,52 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Acta de Entrega</title>
-    <!-- Enlace al CSS separado -->
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Arial', sans-serif; color: #333; margin: 0; padding: 20px; font-size: 11px; line-height: 1.4; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .logo-img { width: 100px; float: left; }
+        .header-text { text-align: center; font-weight: bold; padding-top: 10px; margin-top: 20px;}
+        .title { text-align: center; font-weight: bold; font-size: 14px; margin: 20px 0; text-decoration: underline; }
+        .main-content { margin-top: 20px; text-align: justify; }
+        .dots { border-bottom: 1px solid #000; display: inline-block; padding: 0 5px; font-weight: bold;}
+        .data-table { width: 100%; margin: 15px 0; border-collapse: collapse; }
+        .data-table td { padding: 4px; }
+        .items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .items-table th, .items-table td { border: 1px solid #999; padding: 6px; text-align: left; }
+        .items-table th { background-color: #f2f2f2; }
+        .signatures { margin-top: 70px; width: 100%; }
+        .sig-box { width: 45%; text-align: center; display: inline-block; }
+        .sig-line { border-top: 1px solid #000; margin-bottom: 5px; width: 80%; margin-left: 10%; }
+        .footer-dist { margin-top: 40px; font-size: 9px; font-weight: bold; }
+    </style>
 </head>
 <body>
     <div class="header">
-        <!-- Logo institucional en esquina superior izquierda -->
-        <img src="logo.png" alt="Logo Municipalidad">
+        <img src="logo.png" class="logo-img" onerror="this.style.display='none'">
+        <div class="folio">FOLIO {{ d.folio_provisorio }}</div>
         <div class="header-text">
-            <p><strong>ILUSTRE MUNICIPALIDAD DE OVALLE</strong></p>
-            <p><strong>DEPARTAMENTO DE EDUCACIÓN MUNICIPAL</strong></p>
+            ILUSTRE MUNICIPALIDAD DE OVALLE<br>
+            DEPARTAMENTO DE EDUCACIÓN MUNICIPAL
         </div>
     </div>
 
-    <h1>ACTA DE ENTREGA DE PRODUCTOS Y/O SERVICIOS</h1>
+    <div class="title">ACTA DE ENTREGA DE PRODUCTOS Y/O SERVICIOS</div>
 
-    <p>
-        El día <strong>{{ fecha }}</strong> se hace entrega de los bienes y servicios a don/doña 
-        <strong>{{ receptor }}</strong>, cargo <strong>{{ cargo }}</strong>, y en representación del 
-        Establecimiento o Sección <strong>{{ establecimiento }}</strong>, correspondiente a la fuente de financiamiento: 
-        <strong>{{ financiamiento }}</strong>.
-    </p>
-
-    <p>
-        Orden de compra: <strong>{{ orden_compra }}</strong> &nbsp;&nbsp;
-        Factura: <strong>{{ factura }}</strong> &nbsp;&nbsp;
-        Guía: <strong>{{ guia }}</strong> <br>
-        Proveedor: <strong>{{ proveedor }}</strong> &nbsp;&nbsp;
-        RUT: <strong>{{ rut }}</strong>
-    </p>
-
-    <div class="firma">
-        _________________________ <br>
-        Timbre, Firma y Nombre de quién entrega
+    <div class="main-content">
+        El día <span class="dots">{{ d.fecha }}</span> se hace entrega de los bienes y servicios a don/doña 
+        <span class="dots" style="width: 200px;">{{ d.receptor }}</span>, cargo <span class="dots" style="width: 130px;">{{ d.cargo }}</span>, 
+        y en representation del Establecimiento o Sección <span class="dots"><strong>{{ d.establecimiento }}</strong></span>, 
+        correspondiente a la fuente de financiamiento: <strong>{{ d.financiamiento }}</strong>.
     </div>
 
-    <div class="firma">
-        _________________________ <br>
-        Timbre, Firma y Nombre de quién recibe
+    <table class="data-table">
+        <tr>
+            <td><strong>Orden de Compra:</strong> {{ d.orden_compra }}</td>
+            <td><strong>Factura:</strong> {{ d.factura }}</td>
+            <td><strong>Guía:</strong> {{ d.guia }}</td>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Proveedor:</strong> {{ d.proveedor }}</td>
+            <td><strong>RUT:</strong> {{ d.rut }}</td>
+        </tr>
+        <tr>
+            <td colspan="3"><strong>MONTO TOTAL DEL ACTA:</strong> ${{ d.monto_total_formateado }}</td>
+        </tr>
+    </table>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 10%;">Cant.</th>
+                <th>Descripción de los Bienes y/o Servicios</th>
+                <th style="width: 15%;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>{{ p.cantidad }}</td>
+                <td>{{ p.producto }}</td>
+                <td>${{ p.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="signatures">
+        <div class="sig-box" style="float: left;">
+            <div class="sig-line"></div>
+            Timbre, Firma y Nombre de quién entrega
+        </div>
+        <div class="sig-box" style="float: right;">
+            <div class="sig-line"></div>
+            Timbre, Firma y Nombre de quién recibe
+        </div>
     </div>
 
-    <div class="distribucion">
-        <p><strong>Distribución:</strong></p>
-        <p>Bodega DEM</p>
-        <p>Escuela</p>
+    <div style="clear: both;"></div>
+
+    <div class="footer-dist">
+        Distribución:<br>
+        - Bodega DEM<br>
+        - Establecimiento
     </div>
 </body>
 </html>

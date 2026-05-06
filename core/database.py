@@ -13,13 +13,13 @@ def obtener_conexion():
         return None
 
 def obtener_maestra_colegios():
-    """Trae la lista completa de colegios con sus 3 identificadores."""
+    """Trae RBD, Nombre y Alias para búsqueda triple flexible."""
     with obtener_conexion() as conn:
         if not conn: return []
         cursor = conn.cursor()
         cursor.execute("SELECT rbd, nombre, alias FROM colegios")
         lista = [dict(row) for row in cursor.fetchall()]
-        print(f"📦 Base de Datos: {len(lista)} colegios cargados.")
+        print(f"📦 Base de Datos: {len(lista)} colegios cargados para búsqueda.")
         return lista
 
 def obtener_proveedores_dict():
