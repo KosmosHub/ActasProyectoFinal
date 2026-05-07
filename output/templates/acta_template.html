@@ -36,7 +36,7 @@
     <div class="main-content">
         El día <span class="dots">{{ d.fecha }}</span> se hace entrega de los bienes y servicios a don/doña 
         <span class="dots" style="width: 200px;">{{ d.receptor }}</span>, cargo <span class="dots" style="width: 130px;">{{ d.cargo }}</span>, 
-        y en representation del Establecimiento o Sección <span class="dots"><strong>{{ d.establecimiento }}</strong></span>, 
+        y en representación del Establecimiento o Sección <span class="dots"><strong>{{ d.establecimiento }}</strong></span>, 
         correspondiente a la fuente de financiamiento: <strong>{{ d.financiamiento }}</strong>.
     </div>
 
@@ -68,7 +68,7 @@
             <tr>
                 <td>{{ p.cantidad }}</td>
                 <td>{{ p.producto }}</td>
-                <td>${{ p.total }}</td>
+                <td>${{ "{:,.0f}".format(p.total) }}</td>
             </tr>
             {% endfor %}
         </tbody>
