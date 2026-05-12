@@ -1,71 +1,61 @@
 import sqlite3
 import os
-
-DB_PATH = os.path.join("data", "BD_ActasDespacho.db")
+from config.settings import DATABASE_PATH
 
 def conectar():
-    return sqlite3.connect(DB_PATH)
+    return sqlite3.connect(DATABASE_PATH)
 
-def guardar_proveedor(nombre, rut):
-    """Inserta o actualiza un proveedor en la tabla proveedores."""
+def obtener_maestra_colegios():
     conn = conectar()
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     try:
-        cur.execute("""
-            INSERT INTO proveedores (rut, nombre)
-            VALUES (?, ?)
-            ON CONFLICT(rut) DO UPDATE SET nombre=excluded.nombre
-        """, (rut, nombre))
-        conn.commit()
-    except Exception as e:
-        print(f"❌ Error al guardar proveedor: {e}")
+        cur.execute("SELECT rbd, nombre, alias FROM colegios")
+        return [dict(row) for row in cur.fetchall()]
     finally:
         conn.close()
 
 def obtener_proveedores_dict():
     conn = conectar()
     cur = conn.cursor()
-    cur.execute("SELECT nombre, rut FROM proveedores")
-    data = {nombre: rut for nombre, rut in cur.fetchall()}
-    conn.close()
-    return data
+    try:
+        cur.execute("SELECT nombre, rut FROM proveedores")
+        return {nombre: rut for nombre, rut in cur.fetchall()}
+    finally:
+        conn.close()
 
-def obtener_maestra_colegios():
+def guardar_proveedor(nombre, rut):
     conn = conectar()
     cur = conn.cursor()
-    cur.execute("SELECT rbd, nombre, alias FROM colegios")
-    data = [{"rbd": rbd, "nombre": nombre, "alias": alias} for rbd, nombre, alias in cur.fetchall()]
-    conn.close()
-    return data
+    try:
+        cur.execute("INSERT INTO proveedores (rut, nombre) VALUES (?, ?) ON CONFLICT(rut) DO UPDATE SET nombre=excluded.nombre", (rut, nombre))
+        conn.commit()
+    finally:
+        conn.close()
 
-def registrar_acta(datos_acta):
+def registrar_acta(d):
     conn = conectar()
     cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO actas (fecha_registro, rbd, receptor_manual, cargo_manual, financiamiento,
-                           orden_compra, proveedor_nombre, proveedor_rut, ruta_archivo, total)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        datos_acta["fecha"], datos_acta["rbd"], datos_acta.get("receptor", ""),
-        datos_acta.get("cargo", ""), datos_acta["financiamiento"],
-        datos_acta["orden_compra"], datos_acta["proveedor"], datos_acta["rut"],
-        datos_acta["ruta_archivo"], datos_acta["total"]
-    ))
-    folio = cur.lastrowid
-    conn.commit()
-    conn.close()
-    return folio
-
-def registrar_productos(folio, productos):
-    conn = conectar()
-    cur = conn.cursor()
-    for p in productos:
+    try:
         cur.execute("""
-            INSERT INTO productos (folio, descripcion, cantidad, precio_unit, total)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            folio, p["producto"], p.get("cantidad", 0),
-            p.get("precio_unit", 0), p["total"]
-        ))
-    conn.commit()
-    conn.close()
+            INSERT INTO actas (fecha_registro, rbd, receptor_manual, cargo_manual, financiamiento, 
+                               orden_compra, proveedor_nombre, proveedor_rut, ruta_archivo, total)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (d["fecha"], d["rbd"], d.get("receptor", ""), d.get("cargo", ""), d["financiamiento"],
+              d["orden_compra"], d["proveedor"], d["rut"], d["ruta_archivo"], d["total"]))
+        folio = cur.lastrowid
+        conn.commit()
+        return folio
+    finally:
+        conn.close()
+
+def registrar_productos(folio, lista):
+    conn = conectar()
+    cur = conn.cursor()
+    try:
+        for p in lista:
+            cur.execute("INSERT INTO productos (folio, descripcion, cantidad, precio_unit, total) VALUES (?, ?, ?, ?, ?)",
+                        (folio, p["producto"], p["cantidad"], p["precio_unit"], p["total"]))
+        conn.commit()
+    finally:
+        conn.close()

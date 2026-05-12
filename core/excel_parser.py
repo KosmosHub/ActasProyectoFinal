@@ -1,129 +1,64 @@
 import pandas as pd
 import re
 import difflib
+from core.database import obtener_maestra_colegios
 
-def cargar_excel(ruta_excel):
-    """Carga todas las hojas de un archivo Excel en un diccionario."""
+def limpiar(t):
+    return re.sub(r'[^A-Z0-9]', '', str(t).upper()) if t else ""
+
+def agrupar_por_columnas(ruta_excel):
+    maestra = obtener_maestra_colegios()
+    if not maestra: return {}
+    
     try:
-        xls = pd.ExcelFile(ruta_excel)
-        hojas = {nombre: xls.parse(nombre) for nombre in xls.sheet_names}
-        return hojas
+        # Cargamos el Excel sin encabezados para buscar manualmente la fila de colegios
+        df = pd.read_excel(ruta_excel, header=None)
+        resultados = {}
+
+        # 1. Identificar columnas de productos y precios (escaneo vertical de las primeras 15 filas)
+        col_prod, col_precio, fila_inicio = None, None, 0
+        for r in range(min(15, len(df))):
+            fila = df.iloc[r].astype(str).str.upper()
+            if fila.str.contains("PRODUCTO|DESCRIPCIÓN").any():
+                col_prod = fila.str.contains("PRODUCTO|DESCRIPCIÓN").idxmax()
+                fila_inicio = r + 1
+            if fila.str.contains("PRECIO").any():
+                col_precio = fila.str.contains("PRECIO").idxmax()
+
+        if col_prod is None: return {}
+
+        # 2. Buscar colegios en TODA la matriz de las primeras 10 filas
+        for c in range(len(df.columns)):
+            for r in range(10):
+                valor_celda = str(df.iloc[r, c]).upper()
+                if any(x in valor_celda for x in ["ITEM", "PRODUCTO", "TOTAL", "UNIDAD", "CANTIDAD"]): continue
+                
+                for m in maestra:
+                    # Match difuso: si el nombre de la DB está contenido en la celda o viceversa
+                    if limpiar(m['nombre']) in limpiar(valor_celda) or limpiar(valor_celda) in limpiar(m['nombre']) or (m['alias'] and limpiar(m['alias']) in limpiar(valor_celda)):
+                        rbd = m['rbd']
+                        if rbd not in resultados:
+                            resultados[rbd] = {"nombre": m['nombre'], "productos": [], "subtotal": 0}
+                        
+                        # Extraer productos bajo esta columna específica
+                        for i in range(fila_inicio, len(df)):
+                            producto = str(df.iloc[i, col_prod]).strip()
+                            cantidad = df.iloc[i, c]
+                            
+                            if producto != "nan" and producto != "" and not str(cantidad).strip() in ["", "nan", "-", "0"]:
+                                try:
+                                    cant_val = float(cantidad)
+                                    if cant_val > 0:
+                                        p_raw = str(df.iloc[i, col_precio] if col_precio is not None else 0)
+                                        p_val = float(re.sub(r'[^\d.]', '', p_raw.replace(',', '.')))
+                                        
+                                        item = {"producto": producto, "cantidad": int(cant_val), "precio_unit": p_val, "total": cant_val * p_val}
+                                        resultados[rbd]["productos"].append(item)
+                                        resultados[rbd]["subtotal"] += item["total"]
+                                except: continue
+                        break # Encontró colegio en esta columna, pasar a la siguiente columna
+        
+        return {k: v for k, v in resultados.items() if v["productos"]}
     except Exception as e:
-        print(f"❌ Error al cargar el Excel: {e}")
-        return None
-
-def detectar_hoja_valida(hojas):
-    """Detecta la hoja con más datos (filas x columnas)."""
-    if not hojas:
-        return None
-    hoja_valida = None
-    max_celdas = 0
-    for nombre, df in hojas.items():
-        celdas = df.shape[0] * df.shape[1]
-        if celdas > max_celdas:
-            max_celdas = celdas
-            hoja_valida = df
-    return hoja_valida
-
-def normalizar(texto):
-    if not texto or pd.isna(texto): 
-        return ""
-    t = str(texto).upper()
-    t = re.sub(r'[.\-,\(\)°#]', ' ', t)
-    return " ".join(t.split())
-
-def mejor_match(nombre_col, maestra_prep):
-    """
-    Busca coincidencia difusa palabra por palabra entre nombre de columna y colegios de la BD.
-    """
-    mejor_rbd = None
-    mejor_nombre = nombre_col
-    mejor_score = 0.0
-
-    palabras_col = nombre_col.split()
-
-    for c in maestra_prep:
-        for candidato in [c["nombre"], c["alias"], c["rbd"]]:
-            if not candidato:
-                continue
-            for palabra in palabras_col:
-                score = difflib.SequenceMatcher(None, palabra, candidato).ratio()
-                if score > mejor_score:
-                    mejor_score = score
-                    mejor_rbd = c["rbd"]
-                    mejor_nombre = c["original"]
-
-    # 🔹 Umbral bajo (0.4 = 40%)
-    if mejor_score >= 0.4:
-        return mejor_rbd, mejor_nombre
-    else:
-        return None, nombre_col
-
-def agrupar_por_columnas(df, maestra_colegios):
-    """
-    Recorre columnas de distribución (ej: POLITECNICO, ESTELA AVILA, ARTURO ALESSANDRI)
-    y genera un acta por cada colegio con sus productos.
-    """
-    grupos = {}
-
-    # Preparamos lista de nombres y alias normalizados
-    maestra_prep = []
-    for c in maestra_colegios:
-        maestra_prep.append({
-            "rbd": c.get('rbd', ''),
-            "nombre": normalizar(c.get('nombre', '')),
-            "alias": normalizar(c.get('alias', '')),
-            "original": c.get('nombre', '')
-        })
-
-    columnas_fijas = ["ITEM N°", "Productos solicitados", "UNIDAD MET.", "CANTIDADES", "PRECIO", "IMAGEN REFERENCIAL", "TOTAL"]
-    columnas_colegios = [col for col in df.columns if col not in columnas_fijas]
-
-    for col in columnas_colegios:
-        nombre_col = normalizar(col)
-        colegio_rbd, colegio_nombre = mejor_match(nombre_col, maestra_prep)
-
-        if not colegio_rbd:
-            colegio_rbd = nombre_col
-            colegio_nombre = col
-
-        productos_colegio = []
-
-        # Recorremos filas y tomamos productos
-        for _, fila in df.iterrows():
-            producto = str(fila.get("Productos solicitados", "")).strip()
-            cantidad = fila.get(col, None)
-            precio_unit = fila.get("PRECIO", None)
-
-            if not producto or pd.isna(cantidad) or cantidad == "-" or cantidad == 0:
-                continue
-
-            try:
-                cantidad_val = int(cantidad)
-                precio_val = float(str(precio_unit).replace('$', '').replace('.', '').replace(',', ''))
-                total_val = cantidad_val * precio_val
-
-                productos_colegio.append({
-                    "producto": producto,
-                    "cantidad": cantidad_val,
-                    "total": total_val
-                })
-            except:
-                continue
-
-        # 🔹 Solo agregamos el colegio si tiene productos
-        if productos_colegio:
-            subtotal = sum(p["total"] for p in productos_colegio)
-            iva = subtotal * 0.19
-            total_con_iva = subtotal + iva
-
-            grupos[colegio_rbd] = {
-                "nombre": colegio_nombre,
-                "productos": productos_colegio,
-                "subtotal": subtotal,
-                "iva": iva,
-                "total_con_iva": total_con_iva
-            }
-
-    # 🔹 Si no se detectó nada, devolvemos vacío pero con aviso
-    return grupos
+        print(f"❌ Error crítico: {e}")
+        return {}
