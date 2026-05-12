@@ -1,11 +1,19 @@
 from core.excel_parser import agrupar_por_columnas
-from core.database import registrar_acta, registrar_productos, guardar_proveedor
+from core.database import obtener_maestra_colegios, registrar_acta, registrar_productos, guardar_proveedor
 from core.pdf_generator import generar_acta
 from datetime import datetime
 
 def analizar_excel_previa(ruta_excel):
     datos = agrupar_por_columnas(ruta_excel)
-    return [{"nombre": f"{v['nombre']} ({k})", "productos": len(v['productos']), "total": v["subtotal"] * 1.19, "rbd": k} for k, v in datos.items()]
+    resumen = []
+    for rbd, info in datos.items():
+        resumen.append({
+            "nombre": f"{info['nombre']} ({rbd})",
+            "productos": len(info['productos']),
+            "total": info["subtotal"] * 1.19,
+            "rbd": rbd
+        })
+    return resumen
 
 def procesar_final(ruta_excel, datos_ui):
     datos_colegios = agrupar_por_columnas(ruta_excel)
@@ -24,6 +32,7 @@ def procesar_final(ruta_excel, datos_ui):
             "factura": "_______", "guia": "_______", "folio_provisorio": "SN",
             "receptor": "_______________", "cargo": "_______________"
         }
+        
         ruta_pdf = generar_acta(payload, info["productos"])
         if ruta_pdf:
             payload["ruta_archivo"] = ruta_pdf

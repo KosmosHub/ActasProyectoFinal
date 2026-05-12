@@ -1,64 +1,79 @@
 import pandas as pd
 import re
-import difflib
 from core.database import obtener_maestra_colegios
 
-def limpiar(t):
+def limpiar_texto(t):
     return re.sub(r'[^A-Z0-9]', '', str(t).upper()) if t else ""
 
 def agrupar_por_columnas(ruta_excel):
     maestra = obtener_maestra_colegios()
     if not maestra: return {}
-    
+
     try:
-        # Cargamos el Excel sin encabezados para buscar manualmente la fila de colegios
+        # Cargamos el Excel sin encabezados para buscar la posición real de los datos
         df = pd.read_excel(ruta_excel, header=None)
         resultados = {}
 
-        # 1. Identificar columnas de productos y precios (escaneo vertical de las primeras 15 filas)
-        col_prod, col_precio, fila_inicio = None, None, 0
-        for r in range(min(15, len(df))):
-            fila = df.iloc[r].astype(str).str.upper()
-            if fila.str.contains("PRODUCTO|DESCRIPCIÓN").any():
-                col_prod = fila.str.contains("PRODUCTO|DESCRIPCIÓN").idxmax()
-                fila_inicio = r + 1
-            if fila.str.contains("PRECIO").any():
-                col_precio = fila.str.contains("PRECIO").idxmax()
+        # 1. Localizar coordenadas de la tabla
+        fila_encabezados = 0
+        col_prod, col_precio = None, None
 
+        for r in range(min(20, len(df))):
+            fila_str = df.iloc[r].astype(str).str.upper()
+            if fila_str.str.contains("PRODUCTOS SOLICITADOS").any():
+                fila_encabezados = r
+                col_prod = fila_str.str.contains("PRODUCTOS SOLICITADOS").idxmax()
+                break
+        
         if col_prod is None: return {}
 
-        # 2. Buscar colegios en TODA la matriz de las primeras 10 filas
+        # Buscar la columna de PRECIO unitario en la misma fila de encabezados
+        fila_headers = df.iloc[fila_encabezados].astype(str).str.upper()
+        if fila_headers.str.contains("PRECIO").any():
+            col_precio = fila_headers.str.contains("PRECIO").idxmax()
+
+        # 2. Identificar columnas de colegios (basado en coincidencia con la DB)
         for c in range(len(df.columns)):
-            for r in range(10):
-                valor_celda = str(df.iloc[r, c]).upper()
-                if any(x in valor_celda for x in ["ITEM", "PRODUCTO", "TOTAL", "UNIDAD", "CANTIDAD"]): continue
-                
-                for m in maestra:
-                    # Match difuso: si el nombre de la DB está contenido en la celda o viceversa
-                    if limpiar(m['nombre']) in limpiar(valor_celda) or limpiar(valor_celda) in limpiar(m['nombre']) or (m['alias'] and limpiar(m['alias']) in limpiar(valor_celda)):
-                        rbd = m['rbd']
-                        if rbd not in resultados:
-                            resultados[rbd] = {"nombre": m['nombre'], "productos": [], "subtotal": 0}
+            val_col = str(df.iloc[fila_encabezados, c]).upper()
+            # Ignorar columnas técnicas
+            if any(x in val_col for x in ["ITEM", "PRODUCTO", "UNIDAD", "CANTIDAD", "PRECIO", "TOTAL", "IMAGEN"]):
+                continue
+
+            for m in maestra:
+                nom_db = limpiar_texto(m['nombre'])
+                alias_db = limpiar_texto(m.get('alias', ''))
+                val_limpio = limpiar_texto(val_col)
+
+                # Si el encabezado contiene al menos un 30% del nombre o el alias
+                if (val_limpio and val_limpio in nom_db) or (alias_db and alias_db in val_limpio):
+                    rbd = m['rbd']
+                    if rbd not in resultados:
+                        resultados[rbd] = {"nombre": m['nombre'], "productos": [], "subtotal": 0}
+
+                    # Extraer productos bajo esta columna
+                    for r in range(fila_encabezados + 1, len(df)):
+                        producto = str(df.iloc[r, col_prod]).strip()
+                        cantidad = df.iloc[r, c]
                         
-                        # Extraer productos bajo esta columna específica
-                        for i in range(fila_inicio, len(df)):
-                            producto = str(df.iloc[i, col_prod]).strip()
-                            cantidad = df.iloc[i, c]
-                            
-                            if producto != "nan" and producto != "" and not str(cantidad).strip() in ["", "nan", "-", "0"]:
-                                try:
-                                    cant_val = float(cantidad)
-                                    if cant_val > 0:
-                                        p_raw = str(df.iloc[i, col_precio] if col_precio is not None else 0)
-                                        p_val = float(re.sub(r'[^\d.]', '', p_raw.replace(',', '.')))
-                                        
-                                        item = {"producto": producto, "cantidad": int(cant_val), "precio_unit": p_val, "total": cant_val * p_val}
-                                        resultados[rbd]["productos"].append(item)
-                                        resultados[rbd]["subtotal"] += item["total"]
-                                except: continue
-                        break # Encontró colegio en esta columna, pasar a la siguiente columna
-        
+                        if producto and producto != "nan" and not str(cantidad).strip() in ["", "nan", "-", "0"]:
+                            try:
+                                cant_val = float(cantidad)
+                                if cant_val > 0:
+                                    p_raw = str(df.iloc[r, col_precio] if col_precio is not None else 0)
+                                    p_val = float(re.sub(r'[^\d.]', '', p_raw.replace(',', '.')))
+                                    
+                                    item = {
+                                        "producto": producto,
+                                        "cantidad": int(cant_val),
+                                        "precio_unit": p_val,
+                                        "total": cant_val * p_val
+                                    }
+                                    resultados[rbd]["productos"].append(item)
+                                    resultados[rbd]["subtotal"] += item["total"]
+                            except: continue
+                    break # Colegio encontrado para esta columna
+
         return {k: v for k, v in resultados.items() if v["productos"]}
     except Exception as e:
-        print(f"❌ Error crítico: {e}")
+        print(f"❌ Error crítico en escaneo: {e}")
         return {}
