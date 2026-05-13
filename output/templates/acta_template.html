@@ -1,96 +1,282 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: 'Arial', sans-serif; color: #333; margin: 0; padding: 20px; font-size: 11px; line-height: 1.4; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 10px; }
-        .logo-img { width: 100px; float: left; }
-        .header-text { text-align: center; font-weight: bold; padding-top: 10px; margin-top: 20px;}
-        .title { text-align: center; font-weight: bold; font-size: 14px; margin: 20px 0; text-decoration: underline; }
-        .main-content { margin-top: 20px; text-align: justify; }
-        .dots { border-bottom: 1px solid #000; display: inline-block; padding: 0 5px; font-weight: bold;}
-        .data-table { width: 100%; margin: 15px 0; border-collapse: collapse; }
-        .data-table td { padding: 4px; }
-        .items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .items-table th, .items-table td { border: 1px solid #999; padding: 6px; text-align: left; }
-        .items-table th { background-color: #f2f2f2; }
-        .signatures { margin-top: 70px; width: 100%; }
-        .sig-box { width: 45%; text-align: center; display: inline-block; }
-        .sig-line { border-top: 1px solid #000; margin-bottom: 5px; width: 80%; margin-left: 10%; }
-        .footer-dist { margin-top: 40px; font-size: 9px; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<style>
+@page {
+    size: letter;
+    margin: 20mm;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+.header {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.logo {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.logo img {
+    width: 90px;
+}
+
+.folio {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-weight: bold;
+}
+
+.header-text {
+    text-align: center;
+    font-weight: bold;
+    padding-top: 45px;
+}
+
+.header-line {
+    border-bottom: 2px solid #000;
+    margin-top: 10px;
+}
+
+/* ================= TITLE ================= */
+.title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+    margin: 25px 0;
+    text-decoration: underline;
+}
+
+/* ================= CONTENT ================= */
+.content {
+    flex: 1;
+}
+
+.main-text {
+    text-align: justify;
+    margin-bottom: 15px;
+}
+
+/* ================= TABLES ================= */
+.data-table,
+.items-table,
+.totals {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table td {
+    padding: 4px;
+}
+
+.items-table th,
+.items-table td {
+    border: 1px solid #999;
+    padding: 6px;
+}
+
+.items-table th {
+    background: #f2f2f2;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.establecimiento-title {
+    margin-top: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* ================= TOTALS ================= */
+.totals {
+    width: 35%;
+    margin-left: auto;
+    margin-top: 10px;
+}
+
+.totals td {
+    padding: 4px;
+}
+
+.totals .label {
+    font-weight: bold;
+}
+
+.totals .final {
+    border-top: 1px solid #000;
+    font-weight: bold;
+}
+
+/* ================= FOOTER ================= */
+.footer {
+    margin-top: 50px;
+}
+
+.signatures {
+    width: 100%;
+    margin-top: 60px;
+}
+
+.sig-box {
+    width: 45%;
+    text-align: center;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.sig-line {
+    border-top: 1px solid #000;
+    margin-bottom: 5px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-dist {
+    clear: both;
+    margin-top: 40px;
+    font-size: 9px;
+    font-weight: bold;
+}
+</style>
 </head>
+
 <body>
+<div class="page">
+
     <div class="header">
-        <img src="logo.png" class="logo-img" onerror="this.style.display='none'">
-        <div class="folio">FOLIO {{ d.folio_provisorio }}</div>
+        <div class="logo">
+            <img src="logo.png" onerror="this.style.display='none'">
+        </div>
+
+        <div class="folio">
+            FOLIO N° {{ d.folio_provisorio }}
+        </div>
+
         <div class="header-text">
             ILUSTRE MUNICIPALIDAD DE OVALLE<br>
             DEPARTAMENTO DE EDUCACIÓN MUNICIPAL
         </div>
+
+        <div class="header-line"></div>
     </div>
 
-    <div class="title">ACTA DE ENTREGA DE PRODUCTOS Y/O SERVICIOS</div>
-
-    <div class="main-content">
-        El día <span class="dots">{{ d.fecha }}</span> se hace entrega de los bienes y servicios a don/doña 
-        <span class="dots" style="width: 200px;">{{ d.receptor }}</span>, cargo <span class="dots" style="width: 130px;">{{ d.cargo }}</span>, 
-        y en representación del Establecimiento o Sección <span class="dots"><strong>{{ d.establecimiento }}</strong></span>, 
-        correspondiente a la fuente de financiamiento: <strong>{{ d.financiamiento }}</strong>.
+    <div class="title">
+        ACTA DE ENTREGA DE PRODUCTOS Y/O SERVICIOS
     </div>
 
-    <table class="data-table">
-        <tr>
-            <td><strong>Orden de Compra:</strong> {{ d.orden_compra }}</td>
-            <td><strong>Factura:</strong> {{ d.factura }}</td>
-            <td><strong>Guía:</strong> {{ d.guia }}</td>
-        </tr>
-        <tr>
-            <td colspan="2"><strong>Proveedor:</strong> {{ d.proveedor }}</td>
-            <td><strong>RUT:</strong> {{ d.rut }}</td>
-        </tr>
-        <tr>
-            <td colspan="3"><strong>MONTO TOTAL DEL ACTA:</strong> ${{ d.monto_total_formateado }}</td>
-        </tr>
-    </table>
+    <div class="content">
 
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th style="width: 10%;">Cant.</th>
-                <th>Descripción de los Bienes y/o Servicios</th>
-                <th style="width: 15%;">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in productos %}
-            <tr>
-                <td>{{ p.cantidad }}</td>
-                <td>{{ p.producto }}</td>
-                <td>${{ "{:,.0f}".format(p.total) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="signatures">
-        <div class="sig-box" style="float: left;">
-            <div class="sig-line"></div>
-            Timbre, Firma y Nombre de quién entrega
+        <div class="main-text">
+            El día ____________________ se hace entrega de los bienes y servicios a don/doña
+            <strong>{{ d.receptor }}</strong>,
+            cargo <strong>{{ d.cargo }}</strong>,
+            y en representación del Establecimiento o Sección
+            <strong>{{ d.establecimiento }}</strong>,
+            correspondiente a la fuente de financiamiento:
+            <strong>{{ d.financiamiento }}</strong>.
         </div>
-        <div class="sig-box" style="float: right;">
-            <div class="sig-line"></div>
-            Timbre, Firma y Nombre de quién recibe
+
+        <table class="data-table">
+            <tr>
+                <td><strong>Orden de Compra:</strong> {{ d.orden_compra }}</td>
+                <td><strong>Factura:</strong> {{ d.factura }}</td>
+                <td><strong>Guía:</strong> {{ d.guia }}</td>
+            </tr>
+            <tr>
+                <td colspan="2"><strong>Proveedor:</strong> {{ d.proveedor }}</td>
+                <td><strong>RUT:</strong> {{ d.rut }}</td>
+            </tr>
+        </table>
+
+        <div class="establecimiento-title">
+            {{ d.establecimiento }}
         </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width:10%">Cant.</th>
+                    <th>Descripción de los Bienes y/o Servicios</th>
+                    <th style="width:15%">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td>{{ p.cantidad }}</td>
+                    <td>{{ p.producto }}</td>
+                    <td class="text-right">${{ "{:,.0f}".format(p.total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <table class="totals">
+            <tr>
+                <td class="label">NETO:</td>
+                <td class="text-right">${{ d.neto_formateado }}</td>
+            </tr>
+            <tr>
+                <td class="label">IVA:</td>
+                <td class="text-right">${{ d.iva_formateado }}</td>
+            </tr>
+            <tr>
+                <td class="label final">TOTAL:</td>
+                <td class="text-right final">${{ d.total_formateado }}</td>
+            </tr>
+        </table>
+
     </div>
 
-    <div style="clear: both;"></div>
+    <div class="footer">
 
-    <div class="footer-dist">
-        Distribución:<br>
-        - Bodega DEM<br>
-        - Establecimiento
+        <div class="signatures">
+            <div class="sig-box left">
+                <div class="sig-line"></div>
+                Timbre, Firma y Nombre de quién entrega
+            </div>
+
+            <div class="sig-box right">
+                <div class="sig-line"></div>
+                Timbre, Firma y Nombre de quién recibe
+            </div>
+        </div>
+
+        <div class="footer-dist">
+            Distribución:<br>
+            - Bodega DEM<br>
+            - Establecimiento
+        </div>
+
     </div>
+
+</div>
 </body>
 </html>
