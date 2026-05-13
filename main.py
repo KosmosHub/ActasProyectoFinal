@@ -1,5 +1,5 @@
 from core.excel_parser import agrupar_por_columnas
-from core.database import obtener_maestra_colegios, registrar_acta, registrar_productos, guardar_proveedor
+from core.database import registrar_acta, registrar_productos, guardar_proveedor
 from core.pdf_generator import generar_acta
 from datetime import datetime
 
@@ -10,7 +10,7 @@ def analizar_excel_previa(ruta_excel):
         resumen.append({
             "nombre": f"{info['nombre']} ({rbd})",
             "productos": len(info['productos']),
-            "total": info["subtotal"] * 1.19,
+            "total": info["subtotal"] * 1.19, # IVA incluido
             "rbd": rbd
         })
     return resumen

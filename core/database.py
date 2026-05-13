@@ -1,5 +1,4 @@
 import sqlite3
-import os
 from config.settings import DATABASE_PATH
 
 def conectar():
@@ -27,11 +26,7 @@ def guardar_proveedor(nombre, rut):
     conn = conectar()
     cur = conn.cursor()
     try:
-        cur.execute("""
-            INSERT INTO proveedores (rut, nombre)
-            VALUES (?, ?)
-            ON CONFLICT(rut) DO UPDATE SET nombre=excluded.nombre
-        """, (rut, nombre))
+        cur.execute("INSERT INTO proveedores (rut, nombre) VALUES (?, ?) ON CONFLICT(rut) DO UPDATE SET nombre=excluded.nombre", (rut, nombre))
         conn.commit()
     finally:
         conn.close()
@@ -54,9 +49,7 @@ def registrar_productos(folio, lista):
     conn = conectar()
     cur = conn.cursor()
     for p in lista:
-        cur.execute("""
-            INSERT INTO productos (folio, descripcion, cantidad, precio_unit, total)
-            VALUES (?, ?, ?, ?, ?)
-        """, (folio, p["producto"], p["cantidad"], p.get("precio_unit", 0), p["total"]))
+        cur.execute("INSERT INTO productos (folio, descripcion, cantidad, precio_unit, total) VALUES (?, ?, ?, ?, ?)",
+                    (folio, p["producto"], p["cantidad"], p.get("precio_unit", 0), p["total"]))
     conn.commit()
     conn.close()
