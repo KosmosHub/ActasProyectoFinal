@@ -1,179 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<style>
-@page {
-    size: letter;
-    margin: 20mm;
-}
+    <meta charset="UTF-8">
 
-body {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
+    <style>
 
-.page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
+        @page {
+            size: letter;
+            margin-top: 1.5cm;
+            margin-left: 1.5cm;
+            margin-right: 1.5cm;
+            margin-bottom: 4.5cm;
+        }
 
-/* ================= HEADER ================= */
-.header {
-    position: relative;
-    margin-bottom: 15px;
-}
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #333;
+        }
 
-.logo {
-    position: absolute;
-    left: 0;
-    top: 0;
-}
+        body {
+            width: 100%;
+        }
 
-.logo img {
-    width: 90px;
-}
+        /* ================= HEADER ================= */
 
-.folio {
-    position: absolute;
-    right: 0;
-    top: 0;
-    font-weight: bold;
-}
+        .header {
+            position: relative;
+            height: 80px;
+            margin-bottom: 10px;
+        }
 
-.header-text {
-    text-align: center;
-    font-weight: bold;
-    padding-top: 45px;
-}
+        .logo-img {
+            width: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
 
-.header-line {
-    border-bottom: 2px solid #000;
-    margin-top: 10px;
-}
+        .folio {
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-weight: bold;
+            font-size: 12px;
+        }
 
-/* ================= TITLE ================= */
-.title {
-    text-align: center;
-    font-weight: bold;
-    font-size: 15px;
-    margin: 25px 0;
-    text-decoration: underline;
-}
+        .header-text {
+            text-align: center;
+            font-weight: bold;
+            padding-top: 35px;
+        }
 
-/* ================= CONTENT ================= */
-.content {
-    flex: 1;
-}
+        .header-line {
+            border-bottom: 2px solid #000;
+            margin-top: 10px;
+        }
 
-.main-text {
-    text-align: justify;
-    margin-bottom: 15px;
-}
+        /* ================= TITLE ================= */
 
-/* ================= TABLES ================= */
-.data-table,
-.items-table,
-.totals {
-    width: 100%;
-    border-collapse: collapse;
-}
+        .title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 15px;
+            margin: 20px 0;
+            text-decoration: underline;
+        }
 
-.data-table td {
-    padding: 4px;
-}
+        /* ================= CONTENT ================= */
 
-.items-table th,
-.items-table td {
-    border: 1px solid #999;
-    padding: 6px;
-}
+        .main-text {
+            text-align: justify;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
 
-.items-table th {
-    background: #f2f2f2;
-}
+        /* ================= TABLAS ================= */
 
-.text-right {
-    text-align: right;
-}
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
 
-.establecimiento-title {
-    margin-top: 20px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
+        .items-table th,
+        .items-table td {
+            border: 1px solid #999;
+            padding: 6px;
+        }
 
-/* ================= TOTALS ================= */
-.totals {
-    width: 35%;
-    margin-left: auto;
-    margin-top: 10px;
-}
+        .items-table th {
+            background: #f2f2f2;
+            text-align: left;
+        }
 
-.totals td {
-    padding: 4px;
-}
+        .text-right {
+            text-align: right;
+        }
 
-.totals .label {
-    font-weight: bold;
-}
+        /* ================= TOTALES ================= */
 
-.totals .final {
-    border-top: 1px solid #000;
-    font-weight: bold;
-}
+        .totals-box {
+            width: 35%;
+            margin-left: auto;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
 
-/* ================= FOOTER ================= */
-.footer {
-    margin-top: 50px;
-}
+        .totals-box td {
+            padding: 4px;
+        }
 
-.signatures {
-    width: 100%;
-    margin-top: 60px;
-}
+        .totals-box .label {
+            font-weight: bold;
+        }
 
-.sig-box {
-    width: 45%;
-    text-align: center;
-}
+        .totals-box .final-row td {
+            border-top: 1px solid #000;
+            font-weight: bold;
+        }
 
-.left {
-    float: left;
-}
+        /* ================= FOOTER ================= */
 
-.right {
-    float: right;
-}
+        .footer-final {
+            position: fixed;
+            bottom: -8.0cm;
+            left: 0;
+            right: 0;
+            width: 100%;
+        }
 
-.sig-line {
-    border-top: 1px solid #000;
-    margin-bottom: 5px;
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-}
+        .sig-line {
+            border-top: 1px solid #000;
+            margin-bottom: 5px;
+            width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-.footer-dist {
-    clear: both;
-    margin-top: 40px;
-    font-size: 9px;
-    font-weight: bold;
-}
-</style>
+    </style>
+
 </head>
 
 <body>
-<div class="page">
 
+    <!-- HEADER -->
     <div class="header">
-        <div class="logo">
-            <img src="logo.png" onerror="this.style.display='none'">
-        </div>
+
+        <img src="logo.png"
+             class="logo-img"
+             onerror="this.style.display='none'">
 
         <div class="folio">
             FOLIO N° {{ d.folio_provisorio }}
@@ -185,98 +163,204 @@ body {
         </div>
 
         <div class="header-line"></div>
+
     </div>
 
+    <!-- TITLE -->
     <div class="title">
         ACTA DE ENTREGA DE PRODUCTOS Y/O SERVICIOS
     </div>
 
-    <div class="content">
+    <!-- MAIN TEXT -->
+    <div class="main-text">
 
-        <div class="main-text">
-            El día ____________________ se hace entrega de los bienes y servicios a don/doña
-            <strong>{{ d.receptor }}</strong>,
-            cargo <strong>{{ d.cargo }}</strong>,
-            y en representación del Establecimiento o Sección
-            <strong>{{ d.establecimiento }}</strong>,
-            correspondiente a la fuente de financiamiento:
-            <strong>{{ d.financiamiento }}</strong>.
-        </div>
+        El día ____________________ se hace entrega de los bienes y servicios a don/doña
 
-        <table class="data-table">
-            <tr>
-                <td><strong>Orden de Compra:</strong> {{ d.orden_compra }}</td>
-                <td><strong>Factura:</strong> {{ d.factura }}</td>
-                <td><strong>Guía:</strong> {{ d.guia }}</td>
-            </tr>
-            <tr>
-                <td colspan="2"><strong>Proveedor:</strong> {{ d.proveedor }}</td>
-                <td><strong>RUT:</strong> {{ d.rut }}</td>
-            </tr>
-        </table>
+        <strong>{{ d.receptor }}</strong>,
 
-        <div class="establecimiento-title">
-            {{ d.establecimiento }}
-        </div>
+        cargo <strong>{{ d.cargo }}</strong>,
 
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th style="width:10%">Cant.</th>
-                    <th>Descripción de los Bienes y/o Servicios</th>
-                    <th style="width:15%">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in productos %}
-                <tr>
-                    <td>{{ p.cantidad }}</td>
-                    <td>{{ p.producto }}</td>
-                    <td class="text-right">${{ "{:,.0f}".format(p.total) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        y en representación del Establecimiento o Sección
 
-        <table class="totals">
+        <strong>{{ d.establecimiento }}</strong>,
+
+        correspondiente a la fuente de financiamiento:
+
+        <strong>{{ d.financiamiento }}</strong>.
+
+    </div>
+
+    <!-- DATOS -->
+    <table style="width: 100%; margin-bottom: 10px;">
+
+        <tr>
+
+            <td>
+                <strong>Orden de Compra:</strong>
+                {{ d.orden_compra }}
+            </td>
+
+            <td>
+                <strong>Factura:</strong>
+                {{ d.factura }}
+            </td>
+
+            <td>
+                <strong>Guía:</strong>
+                {{ d.guia }}
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td colspan="2">
+                <strong>Proveedor:</strong>
+                {{ d.proveedor }}
+            </td>
+
+            <td>
+                <strong>RUT:</strong>
+                {{ d.rut }}
+            </td>
+
+        </tr>
+
+    </table>
+
+    <!-- TITULO TABLA -->
+    <div style="font-weight: bold; text-transform: uppercase; margin-top: 15px;">
+        {{ d.establecimiento }}
+    </div>
+
+    <!-- TABLA PRODUCTOS -->
+    <table class="items-table">
+
+        <thead>
+
             <tr>
-                <td class="label">NETO:</td>
-                <td class="text-right">${{ d.neto_formateado }}</td>
+                <th style="width: 10%;">Cant.</th>
+                <th>Descripción de los Bienes y/o Servicios</th>
+                <th style="width: 15%;">Total</th>
             </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for p in productos %}
+
             <tr>
-                <td class="label">IVA:</td>
-                <td class="text-right">${{ d.iva_formateado }}</td>
+
+                <td>
+                    {{ p.cantidad }}
+                </td>
+
+                <td>
+                    {{ p.producto }}
+                </td>
+
+                <td class="text-right">
+                    ${{ "{:,.0f}".format(p.total) }}
+                </td>
+
             </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <!-- TOTALES -->
+    <table class="totals-box">
+
+        <tr>
+            <td class="label">NETO:</td>
+            <td class="text-right">
+                ${{ d.neto_formateado }}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">IVA (19%):</td>
+            <td class="text-right">
+                ${{ d.iva_formateado }}
+            </td>
+        </tr>
+
+        <tr class="final-row">
+            <td>TOTAL:</td>
+            <td class="text-right">
+                ${{ d.total_formateado }}
+            </td>
+        </tr>
+
+    </table>
+
+    <!-- ESPACIADOR DINÁMICO -->
+
+    {% if productos|length <= 3 %}
+        <div style="height: 420px;"></div>
+
+    {% elif productos|length <= 6 %}
+        <div style="height: 300px;"></div>
+
+    {% elif productos|length <= 9 %}
+        <div style="height: 180px;"></div>
+
+    {% elif productos|length <= 13 %}
+        <div style="height: 80px;"></div>
+
+    {% else %}
+        <div style="height: 10px;"></div>
+    {% endif %}
+
+    <!-- FOOTER -->
+    <div class="footer-final">
+
+        <table style="width: 100%; border-collapse: collapse;">
+
             <tr>
-                <td class="label final">TOTAL:</td>
-                <td class="text-right final">${{ d.total_formateado }}</td>
+
+                <td style="width: 45%; text-align: center;">
+
+                    <div class="sig-line"></div>
+
+                    Timbre, Firma y Nombre de quién entrega
+
+                </td>
+
+                <td style="width: 10%;"></td>
+
+                <td style="width: 45%; text-align: center;">
+
+                    <div class="sig-line"></div>
+
+                    Timbre, Firma y Nombre de quién recibe
+
+                </td>
+
             </tr>
+
+            <tr>
+
+                <td colspan="3"
+                    style="padding-top: 15px;
+                           font-size: 9px;
+                           font-weight: bold;">
+
+                    Distribución:<br>
+                    - Bodega DEM<br>
+                    - Establecimiento
+
+                </td>
+
+            </tr>
+
         </table>
 
     </div>
 
-    <div class="footer">
-
-        <div class="signatures">
-            <div class="sig-box left">
-                <div class="sig-line"></div>
-                Timbre, Firma y Nombre de quién entrega
-            </div>
-
-            <div class="sig-box right">
-                <div class="sig-line"></div>
-                Timbre, Firma y Nombre de quién recibe
-            </div>
-        </div>
-
-        <div class="footer-dist">
-            Distribución:<br>
-            - Bodega DEM<br>
-            - Establecimiento
-        </div>
-
-    </div>
-
-</div>
 </body>
 </html>
