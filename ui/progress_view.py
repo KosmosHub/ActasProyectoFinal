@@ -1,43 +1,39 @@
-# ui/progress_view.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar, QTextEdit
+from PyQt5.QtCore import Qt
 
 class ProgressView(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout()
+        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setSpacing(20)
 
         self.label_title = QLabel("Generando actas de despacho…")
-        self.label_note = QLabel("No cierre la aplicación.")
+        self.label_title.setObjectName("titleLabel")
+        self.label_title.setAlignment(Qt.AlignCenter)
+
+        self.label_note = QLabel("Por favor, no cierre la aplicación. Esto puede tomar unos segundos.")
+        self.label_note.setAlignment(Qt.AlignCenter)
+        self.label_note.setStyleSheet("color: #888888; font-style: italic;")
 
         # Barra de progreso
         self.progress = QProgressBar()
-        self.progress.setValue(58)  # Simulación: 58% completado
+        self.progress.setFixedHeight(25)
+        self.progress.setValue(0) # Inicial en 0
 
-        # Log del proceso
+        # Log del proceso (estilo terminal)
         self.log = QTextEdit()
         self.log.setReadOnly(True)
-        self.log.setText(
-            "✓ Escuela Diego de Almagro — Folio #0041\n"
-            "✓ Colegio San Martín — Folio #0042\n"
-            "✓ Liceo Técnico A-34 — Folio #0043\n"
-            "➜ Procesando: Escuela República de Italia…\n"
-            "Pendiente: 5 establecimientos"
-        )
-
+        self.log.setObjectName("logText") # Para darle estilo oscuro en QSS
+        
+        layout.addStretch()
         layout.addWidget(self.label_title)
         layout.addWidget(self.label_note)
         layout.addWidget(self.progress)
         layout.addWidget(self.log)
+        layout.addStretch()
 
         self.setLayout(layout)
 
-
-# 🔹 Bloque de prueba independiente
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-    window = ProgressView()
-    window.show()
-    sys.exit(app.exec_())
+    def append_log(self, text):
+        self.log.append(text)

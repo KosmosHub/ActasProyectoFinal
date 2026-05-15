@@ -1,15 +1,309 @@
-QMainWindow {
-    background-color: #F4F6F7;
+/* =========================================================
+   Tema Oscuro / Minimalista en Escala de Grises - DEM Ovalle
+   ========================================================= */
+
+QMainWindow, QWidget {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 13px;
 }
 
+/* --- Entradas de texto y ComboBox --- */
+QLineEdit, QComboBox {
+    background-color: #2b2b2b;
+    border: 1px solid #444444;
+    border-radius: 5px;
+    padding: 8px;
+    color: #ffffff;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #888888;
+    background-color: #333333;
+}
+
+/* --- Estilos específicos para la caja desplegable del ComboBox --- */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 30px;
+    border-left: 1px solid #444444; /* Línea separadora */
+}
+
+/* Dibujamos la flecha con CSS */
+QComboBox::down-arrow {
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #cfcfcf; /* Color de la flecha */
+    margin-right: 2px;
+}
+
+QComboBox::down-arrow:on {
+    border-top: 6px solid #ffffff; /* Se ilumina al hacer clic */
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2b2b2b;
+    color: #ffffff;
+    selection-background-color: #444444;
+    border: 1px solid #444444;
+}
+
+/* --- Etiquetas --- */
+QLabel {
+    color: #cccccc;
+}
+
+/* Títulos principales de cada vista */
+QLabel#titleLabel {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+/* --- Tabla de Vista Previa --- */
+QTableWidget {
+    background-color: #252525;
+    alternate-background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+    border-radius: 5px;
+    gridline-color: #3a3a3a;
+    selection-background-color: #4a4a4a;
+}
+
+QHeaderView::section {
+    background-color: #1a1a1a;
+    color: #aaaaaa;
+    padding: 8px;
+    border: none;
+    border-right: 1px solid #3a3a3a;
+    border-bottom: 1px solid #3a3a3a;
+    font-weight: bold;
+}
+
+/* --- Botones Genéricos --- */
 QPushButton {
-    background-color: #2E86C1;
+    background-color: #383838;
     color: white;
     font-size: 14px;
-    padding: 8px;
+    font-weight: bold;
+    padding: 10px;
     border-radius: 5px;
+    border: 1px solid #555555;
 }
 
 QPushButton:hover {
-    background-color: #1B4F72;
+    background-color: #4a4a4a;
+    border: 1px solid #777777;
+}
+
+QPushButton:pressed {
+    background-color: #222222;
+}
+
+/* --- Botones Específicos --- */
+QPushButton#btnPrimary {
+    background-color: #2a2a2a;
+    color: white;
+}
+
+QPushButton#btnSuccess {
+    background-color: #27ae60;
+    border: 1px solid #2ecc71;
+    color: white;
+}
+
+QPushButton#btnSuccess:hover {
+    background-color: #2ecc71;
+}
+
+QPushButton#btnSecondary {
+    background-color: transparent;
+    color: #888888;
+    text-decoration: underline;
+    border: none;
+}
+
+QPushButton#btnSecondary:hover {
+    color: #ffffff;
+    background-color: transparent;
+    border: none;
+}
+
+QPushButton#btnConfirmar {
+    background-color: #2a2a2a; 
+    border: 1px solid #555555;
+    color: #ffffff;
+}
+
+QPushButton#btnConfirmar:hover {
+    background-color: #3d3d3d;
+    border: 1px solid #888888;
+}
+
+QPushButton#btnConfirmar:disabled {
+    background-color: #27ae60; 
+    color: #ffffff;
+    border: none;
+}
+
+QPushButton#btnError {
+    background-color: #c0392b;
+    color: white;
+    border: none;
+}
+
+/* =========================================================
+   ESTILOS PARA PANTALLAS DE PROGRESO Y ÉXITO
+   ========================================================= */
+
+/* --- Barra de Progreso --- */
+QProgressBar {
+    border: 1px solid #444444;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #2b2b2b;
+    color: white;
+    font-weight: bold;
+}
+
+QProgressBar::chunk {
+    background-color: #27ae60; /* Color verde de progreso */
+    border-radius: 4px;
+}
+
+/* --- Consola / Log (QTextEdit) --- */
+QTextEdit#logText {
+    background-color: #111111;
+    color: #00ffcc; /* Letra tipo consola (cian brillante) */
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+/* --- Cuadro de resumen general --- */
+QFrame#resumenFrame {
+    background-color: #252525;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+/* =========================================================
+   ESTILOS PARA ZONA DRAG & DROP
+   ========================================================= */
+
+QFrame#dropZone {
+    background-color: #222222;
+    border: 2px dashed #555555;
+    border-radius: 12px;
+}
+
+/* Cambia de color cuando arrastras un archivo sobre ella */
+QFrame#dropZone[hover="true"] {
+    background-color: #2b3b2b;
+    border: 2px dashed #27ae60;
+}
+
+/* =========================================================
+   ESTRUCTURA: SIDEBAR Y PNL MAIN (NUEVOS)
+   ========================================================= */
+
+/* pnlSidebar */
+QWidget#pnlSidebar {
+    background-color: #1a1a1a;
+    border-right: 1px solid #333333;
+}
+
+QLabel#lblModulos {
+    color: #888888;
+    font-weight: bold;
+    font-size: 13px;
+    padding-left: 10px;
+    background-color: transparent;
+}
+
+/* Botones de navegación del Sidebar */
+QPushButton#btnSidebar, QPushButton#btnSidebarActive {
+    background-color: transparent;
+    color: #aaaaaa;
+    text-align: left;
+    padding: 12px 0px 12px 20px;
+    border: none;
+    border-radius: 0;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+QPushButton#btnSidebar:hover {
+    background-color: #252525;
+    color: #ffffff;
+}
+
+QPushButton#btnSidebarActive {
+    background-color: #2b2b2b;
+    color: #ffffff;
+    border-left: 5px solid #27ae60; /* Indicador visual izquierdo */
+}
+
+/* button1 (Barra de estado del archivo debajo del formulario) */
+QPushButton#btnStatus {
+    text-align: left;
+    padding-left: 15px;
+    background-color: #222222;
+    color: #888888;
+    border: 1px solid #444444;
+    font-weight: normal;
+}
+QPushButton#btnStatusActive {
+    text-align: left;
+    padding-left: 15px;
+    background-color: #1e3a29;
+    color: #2ecc71;
+    border: 1px solid #27ae60;
+    font-weight: bold;
+}
+QPushButton#btnStatusError {
+    text-align: left;
+    padding-left: 15px;
+    background-color: #3b1e1e;
+    color: #e74c3c;
+    border: 1px solid #c0392b;
+    font-weight: bold;
+}
+
+/* Botones inferiores derechos (Procesar y Cancelar) */
+QPushButton#btnCancelar {
+    background-color: transparent;
+    color: #cccccc;
+    border: 1px solid #666666;
+}
+QPushButton#btnCancelar:hover {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+QPushButton#btnProcesar {
+    background-color: #3a3a3a;
+    color: white;
+    border: 1px solid #555555;
+}
+QPushButton#btnProcesar:disabled {
+    background-color: #222222;
+    color: #555555;
+    border: 1px solid #333333;
+}
+QPushButton#btnProcesar:enabled {
+    background-color: #27ae60;
+    border: 1px solid #2ecc71;
+}
+QPushButton#btnProcesar:enabled:hover {
+    background-color: #2ecc71;
 }
